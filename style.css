@@ -40,10 +40,10 @@ h1 {
 .stats {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 10px;
 }
 
-.safe-count {
+.safe-count, .flag-count {
     font-size: 1.2rem;
     background: rgba(0, 0, 0, 0.5);
     padding: 5px 10px;
@@ -174,12 +174,16 @@ button:hover {
         font-size: 1.5rem;
     }
     
-    .safe-count {
+    .safe-count, .flag-count {
         font-size: 1rem;
     }
     
     button {
         padding: 6px 10px;
         font-size: 0.8rem;
+    }
+    
+    .stats {
+        gap: 5px;
     }
 }
