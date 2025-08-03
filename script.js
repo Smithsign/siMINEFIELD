@@ -5,7 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
         mineCount: 10,
         safeTile: '🍊',
         mineTile: '💣',
-        flagTile: '🚩'
+        flagTile: '🚩',
+        maxFlags: 5
     };
     
     // Game state
@@ -15,13 +16,15 @@ document.addEventListener('DOMContentLoaded', () => {
         revealed: [],
         flagged: [],
         safeTiles: 0,
-        gameOver: false
+        gameOver: false,
+        flagsRemaining: config.maxFlags
     };
     
     // DOM elements
     const gameGrid = document.getElementById('game-grid');
     const safeFoundElement = document.getElementById('safe-found');
     const safeTotalElement = document.getElementById('safe-total');
+    const flagsRemainingElement = document.getElementById('flags-remaining');
     const restartBtn = document.getElementById('restart-btn');
     const tryAgainBtn = document.getElementById('try-again-btn');
     const gameOverScreen = document.getElementById('game-over');
@@ -49,10 +52,12 @@ document.addEventListener('DOMContentLoaded', () => {
             revealed: Array(config.gridSize * config.gridSize).fill(false),
             flagged: Array(config.gridSize * config.gridSize).fill(false),
             safeTiles: 0,
-            gameOver: false
+            gameOver: false,
+            flagsRemaining: config.maxFlags
         };
         
-        // Hide game over screen
+        // Update UI
+        flagsRemainingElement.textContent = gameState.flagsRemaining;
         gameOverScreen.classList.remove('show');
         
         // Calculate total safe tiles
@@ -127,18 +132,27 @@ document.addEventListener('DOMContentLoaded', () => {
         if (gameState.revealed[index]) return;
         
         // Toggle flag
-        gameState.flagged[index] = !gameState.flagged[index];
-        
-        // Play flag sound
-        flagSound.currentTime = 0;
-        flagSound.play();
-        
-        // Update tile appearance
         if (gameState.flagged[index]) {
-            tile.textContent = config.flagTile;
-        } else {
+            // Removing a flag
+            gameState.flagged[index] = false;
             tile.textContent = '';
+            gameState.flagsRemaining++;
+        } else {
+            // Adding a flag - check if we have any left
+            if (gameState.flagsRemaining > 0) {
+                gameState.flagged[index] = true;
+                tile.textContent = config.flagTile;
+                gameState.flagsRemaining--;
+                // Play flag sound only when placing a flag
+                flagSound.currentTime = 0;
+                flagSound.play();
+            } else {
+                return; // No flags left
+            }
         }
+        
+        // Update flag counter display
+        flagsRemainingElement.textContent = gameState.flagsRemaining;
     }
     
     // For mobile long-press to flag
@@ -153,19 +167,28 @@ document.addEventListener('DOMContentLoaded', () => {
         if (gameState.revealed[index]) return;
         
         touchTimer = setTimeout(() => {
-            // Toggle flag
-            gameState.flagged[index] = !gameState.flagged[index];
-            
-            // Play flag sound
-            flagSound.currentTime = 0;
-            flagSound.play();
-            
-            // Update tile appearance
             if (gameState.flagged[index]) {
-                tile.textContent = config.flagTile;
-            } else {
+                // Removing a flag
+                gameState.flagged[index] = false;
                 tile.textContent = '';
+                gameState.flagsRemaining++;
+            } else {
+                // Adding a flag - check if we have any left
+                if (gameState.flagsRemaining > 0) {
+                    gameState.flagged[index] = true;
+                    tile.textContent = config.flagTile;
+                    gameState.flagsRemaining--;
+                    // Play flag sound only when placing a flag
+                    flagSound.currentTime = 0;
+                    flagSound.play();
+                } else {
+                    return; // No flags left
+                }
             }
+            
+            // Update flag counter display
+            flagsRemainingElement.textContent = gameState.flagsRemaining;
+            e.preventDefault(); // Prevent context menu on mobile
         }, 500); // 500ms for long press
     }
     
